@@ -74,10 +74,7 @@
             const logEntry = document.createElement('div');
             logEntry.className = `log-entry ${type}`;
             const timestamp = new Date().toLocaleTimeString();
-            logEntry.innerHTML = `
-                <span class="timestamp">[${timestamp}]</span>
-                <span>${message}</span>
-            `;
+            logEntry.innerHTML = `<span class="timestamp">[${timestamp}]</span><span>${message}</span>`;
             logContent.appendChild(logEntry);
             logEntry.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
@@ -90,8 +87,7 @@
         async function enviarFormulario() {
             btnEnviar.disabled = true;
             btnEnviar.textContent = '⏳ ENVIANDO...';
-            
-            addLog('🚀 Iniciando Brilhante 2 Bot...', 'info');
+            addLog('🚀 Iniciando Brilhante Bot...', 'info');
             
             const dados = {
                 email: document.getElementById('email').value,
@@ -104,24 +100,13 @@
             try {
                 const response = await fetch('/api/enviar', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(dados)
                 });
-                
                 const resultado = await response.json();
-                
-                for (const log of resultado.logs) {
-                    addLog(log.message, log.type);
-                }
-                
-                if (resultado.sucesso) {
-                    addLog(`🎉 PROCESSO FINALIZADO COM SUCESSO!`, 'success');
-                } else {
-                    addLog(`❌ PROCESSO FINALIZADO COM FALHA!`, 'error');
-                }
-                
+                for (const log of resultado.logs) addLog(log.message, log.type);
+                if (resultado.sucesso) addLog(`🎉 PROCESSO FINALIZADO COM SUCESSO!`, 'success');
+                else addLog(`❌ PROCESSO FINALIZADO COM FALHA!`, 'error');
             } catch (error) {
                 addLog(`❌ Erro de conexão: ${error.message}`, 'error');
                 addLog(`🔧 Certifique-se que o servidor Python está rodando!`, 'warning');
