@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brilhante 2 - Bot Automático</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <h1>🚚 Brilhante 2</h1>
+                <p>Bot Automático de Rotas</p>
+            </div>
+            
+            <div class="content">
+                <div class="config-section">
+                    <h3>📋 Suas Informações</h3>
+                    <div class="form-group">
+                        <label>E-mail:</label>
+                        <input type="email" id="email" value="gho8885@gmail.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Driver ID:</label>
+                        <input type="text" id="driverId" value="163347">
+                    </div>
+                    <div class="form-group">
+                        <label>Telefone:</label>
+                        <input type="text" id="telefone" value="47996327935">
+                    </div>
+                </div>
+
+                <div class="config-section">
+                    <h3>🎯 Regras de Seleção</h3>
+                    <div class="form-group">
+                        <label>Palavras Prioritárias:</label>
+                        <input type="text" id="prioridades" value="NOVA ESPERANÇA, CEDROS, MONTE ALEGRE, NAÇÕES">
+                        <small>Separadas por vírgula</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Palavras Bloqueadas:</label>
+                        <input type="text" id="bloqueadas" value="BRUSQUE, MOTO, FIORINO, CENTRO">
+                        <small>Separadas por vírgula</small>
+                    </div>
+                </div>
+
+                <button id="btnEnviar" class="btn-enviar">
+                    🚀 ENVIAR FORMULÁRIO
+                </button>
+
+                <div class="log-section">
+                    <div class="log-header">
+                        <span>📝 Log de Execução</span>
+                        <button id="btnLimpar" class="btn-clear">Limpar</button>
+                    </div>
+                    <div id="logContent" class="log-content">
+                        <div class="log-entry info">
+                            <span class="timestamp">[--:--:--]</span>
+                            <span>✨ Aguardando ação...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const btnEnviar = document.getElementById('btnEnviar');
+        const btnLimpar = document.getElementById('btnLimpar');
+        const logContent = document.getElementById('logContent');
+
+        function addLog(message, type = 'info') {
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            const timestamp = new Date().toLocaleTimeString();
+            logEntry.innerHTML = `
+                <span class="timestamp">[${timestamp}]</span>
+                <span>${message}</span>
+            `;
+            logContent.appendChild(logEntry);
+            logEntry.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function limparLog() {
+            logContent.innerHTML = '';
+            addLog('✨ Log limpo', 'info');
+        }
+
+        async function enviarFormulario() {
+            btnEnviar.disabled = true;
+            btnEnviar.textContent = '⏳ ENVIANDO...';
+            
+            addLog('🚀 Iniciando Brilhante 2 Bot...', 'info');
+            
+            const dados = {
+                email: document.getElementById('email').value,
+                driverId: document.getElementById('driverId').value,
+                telefone: document.getElementById('telefone').value,
+                prioridades: document.getElementById('prioridades').value.split(',').map(p => p.trim()),
+                bloqueadas: document.getElementById('bloqueadas').value.split(',').map(b => b.trim())
+            };
+            
+            try {
+                const response = await fetch('/api/enviar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(dados)
+                });
+                
+                const resultado = await response.json();
+                
+                for (const log of resultado.logs) {
+                    addLog(log.message, log.type);
+                }
+                
+                if (resultado.sucesso) {
+                    addLog(`🎉 PROCESSO FINALIZADO COM SUCESSO!`, 'success');
+                } else {
+                    addLog(`❌ PROCESSO FINALIZADO COM FALHA!`, 'error');
+                }
+                
+            } catch (error) {
+                addLog(`❌ Erro de conexão: ${error.message}`, 'error');
+                addLog(`🔧 Certifique-se que o servidor Python está rodando!`, 'warning');
+            }
+            
+            btnEnviar.disabled = false;
+            btnEnviar.textContent = '🚀 ENVIAR FORMULÁRIO';
+        }
+        
+        btnEnviar.addEventListener('click', enviarFormulario);
+        btnLimpar.addEventListener('click', limparLog);
+    </script>
+</body>
+</html>
